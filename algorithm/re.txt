@@ -1,0 +1,201 @@
+import sys
+import random
+ 
+comparisons = 0
+ 
+def quickSort(array, pivotFunction):
+    global comparisons
+    arrayLength = len(array)
+ 
+    if arrayLength <= 1:
+        return array
+     
+    else:
+        # Increment comparisons
+        #print "adding comparisons: " + str(arrayLength - 1)
+        comparisons += arrayLength - 1
+     
+        # Choose pivot whatever way
+        pivotIndex = pivotFunction(array, arrayLength)
+        pivot = array[pivotIndex]
+        #print arrayLength, pivotIndex
+         
+        # Swap first element of the array with pivot
+        tmp = array[0]
+        array[0] = array[pivotIndex]
+        array[pivotIndex] = tmp
+         
+        # Partition into subarrays
+        i = 1
+ 
+        for j in range(1, arrayLength):
+            if array[j] < pivot:
+                # Swap array[j] and array[i]
+                tmp = array[i]
+                array[i] = array[j]
+                array[j] = tmp
+                 
+                i += 1
+         
+        # Put the pivot back in place
+        tmp = array[0]
+        array[0] = array[i-1]
+        array[i-1] = tmp
+         
+        # Slice array and recursively sort
+        lesser = array[:i-1]
+        greater = array[i:]
+         
+        #print pivot, lesser, greater
+ 
+        lesser = quickSort(lesser, pivotFunction)
+        greater = quickSort(greater, pivotFunction)
+         
+        # Return merged array
+        return lesser + [pivot] + greater
+         
+def firstElement(array, arrayLength):
+    return 0
+     
+def lastElement(array, arrayLength):
+    return arrayLength - 1
+ 
+def medianOfThree(array, arrayLength):
+    # Median of three
+    firstIndex = 0
+    first = array[firstIndex]
+ 
+    lastIndex = arrayLength-1
+    last = array[lastIndex]
+         
+    if arrayLength % 2 == 0:
+        middleIndex = (arrayLength / 2) - 1
+        middle = array[middleIndex]
+    else:
+        middleIndex = arrayLength / 2
+        middle = array[middleIndex]
+ 
+    if (first < middle and first > last) or (first > middle and first < last):
+        return firstIndex
+    elif (middle < first and middle > last) or (middle > first and middle < last):
+        return middleIndex
+    else:
+        return lastIndex
+         
+def randomPivot(array, arrayLength):
+    return random.randint(0, arrayLength-1)
+         
+def tests():
+    global comparisons
+     
+    print "*** Running Unit Tests ***"
+     
+    # Test medianOfThree
+    print "medianOfThree: testing"
+    assert medianOfThree([0, 1, 2, 3], 4) == 1
+    assert medianOfThree([7, 1, 2, 3, 6, 5], 6) == 5
+    assert medianOfThree([0, 9, 8, 7, 6, 5, 4, 3, 2, 1], 10) == 9
+    assert medianOfThree([1, 2], 2) == 1
+    assert medianOfThree([2, 1], 2) == 1
+    print "medianOfThree: tests passed"
+     
+    # Test quickSort with medianOfThree pivot function
+    print "quickSort with medianOfThree: testing"
+    comparisons = 0
+    array = [0, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    sorted = quickSort(array, medianOfThree)
+    assert comparisons == 25
+     
+    comparisons = 0
+    array = [9, 6, 3, 7, 4, 2]
+    sorted = quickSort(array, medianOfThree)
+    assert comparisons == 9
+     
+    comparisons = 0
+    array = [1, 11, 5, 15, 2, 12, 9, 99, 77, 0]
+    sorted = quickSort(array, medianOfThree)
+    assert comparisons == 22
+    print "quickSort with medianOfThree: tests passed"
+     
+    # Test quickSort with firstElement pivot function
+    print "quickSort with firstElement: testing"
+    comparisons = 0
+    array = [9, 6, 3, 7, 4, 2]
+    sorted = quickSort(array, firstElement)
+    assert comparisons == 13
+     
+    comparisons = 0
+    array = [9, 6, 3, 7, 2, 4]
+    sorted = quickSort(array, firstElement)
+    assert comparisons == 11
+     
+    comparisons = 0
+    array = [1, 2, 3, 4]
+    sorted = quickSort(array, firstElement)
+    assert comparisons == 6
+    print "quickSort with firstElement: tests passed"
+     
+    # Test quickSort with lastElement pivot function
+    print "quickSort with lastElement: testing"
+    comparisons = 0
+    array = [9, 6, 3, 7, 4, 2]
+    sorted = quickSort(array, lastElement)
+    assert comparisons == 13
+     
+    comparisons = 0
+    array = [9, 6, 3, 7, 2, 4]
+    sorted = quickSort(array, lastElement)
+    assert comparisons == 9
+     
+    comparisons = 0
+    array = [1, 2, 3, 4]
+    sorted = quickSort(array, lastElement)
+    assert comparisons == 6
+    print "quickSort with lastElement: tests passed"
+     
+    print "All tests passed"
+ 
+def sortFile():
+    global comparisons
+     
+    print "*** Running QuickSort on File ***"
+ 
+    # Read data from file
+    file = open(sys.argv[1], "r")
+    numArray = file.readlines()
+    file.close()
+ 
+    # Make numeric array from file data
+    integers = []
+    for num in numArray:
+        try:
+            integers.append(int(num))
+        except Exception:
+            pass
+     
+    # Run quickSort with all three pivot functions
+    # Be sure to deep copy lists
+     
+    # firstElement: 162085 is correct answer
+    comparisons = 0
+    sorted = quickSort(integers[:], firstElement)
+    print "quickSort with firstElement - total comparisons: " + str(comparisons)
+     
+    comparisons = 0
+    sorted = quickSort(integers[:], lastElement)
+    print "quickSort with lastElement - total comparisons: " + str(comparisons)
+     
+    comparisons = 0
+    sorted = quickSort(integers[:], medianOfThree)
+    print "quickSort with medianOfThree - total comparisons: " + str(comparisons)
+     
+    comparisons = 0
+    sorted = quickSort(integers[:], randomPivot)
+    print "quickSort with randomPivot - total comparisons: " + str(comparisons)
+ 
+def main():
+    tests()
+    sortFile()
+     
+if __name__ == "__main__":
+    main()
